@@ -1,5 +1,5 @@
 .idea/
-data/chb-mit
-data/processed
+data/chb-mit/*
+data/processed/*
 notebooks/.ipynb_checkpoints
 outputs/
