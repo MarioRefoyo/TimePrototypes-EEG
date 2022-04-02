@@ -1,4 +1,5 @@
 .idea/
 data/chb-mit/*
 data/processed/*
+data/raw_concat/*
 notebooks/.ipynb_checkpoints

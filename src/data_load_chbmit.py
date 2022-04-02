@@ -199,10 +199,11 @@ def generate_seizure_label(seizures, fs, length):
 
     return seizure
 
+
 if __name__ == "__main__":
     # Declare data path and the desired patient to read the data
     data_path = '../data/chb-mit/'
-    patient = 'chb02'
+    patient = 'chb01'
     patient_data_path = f'{data_path}{patient}/'
     # Calculate the annotation file path for such patient
     annotation_fname = f'{patient}-summary.txt'
@@ -218,7 +219,7 @@ if __name__ == "__main__":
     patient_data_df = generate_patient_data(patient_data_path, registers_info, channel_index)
 
     # Store dataframe as pickle
-    patient_data_df.to_pickle(f'../data/processed/{patient}_data_concatenated.pickle')
+    patient_data_df.to_pickle(f'../data/raw_concat/{patient}_data_concatenated.pickle')
 
     # Extract the data of the
     print(patient_data_df.info())
