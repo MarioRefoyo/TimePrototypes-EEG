@@ -27,10 +27,10 @@ def generate_seizure_labels(sample_labels, w_size):
     # Reshape and sum the rows
     seizure_labels = sample_labels.reshape(-1, w_size).sum(axis=1)
     # Put target as one if at least half of the window contain seizure samples
-    seizure_labels[seizure_labels > (w_size//2)] = 1
     seizure_labels[seizure_labels <= (w_size//2)] = 0
+    seizure_labels[seizure_labels > (w_size//2)] = 1
 
-    return seizure_labels
+    return seizure_labels.reshape(-1, 1)
 
 
 def create_dataset(raw_patient_dataset, w_size):
@@ -63,12 +63,12 @@ if __name__ == '__main__':
 
     # ---------- CREATE DATASET --------- #
     # Select patient
-    patient = 'chb01'
+    patient = 'chb18'
     # Select window size
     window_size = 512
 
     # Load concatenated data for the patient
-    raw_patient_dataset = pd.read_pickle('../data/raw_concat/chb01_data_concatenated.pickle')
+    raw_patient_dataset = pd.read_pickle(f'../data/raw_concat/{patient}_data_concatenated.pickle')
 
     # Create dataset with labels
     registers_dataset = create_dataset(raw_patient_dataset, window_size)

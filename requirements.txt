@@ -1,3 +1,4 @@
-tensorflow==2.1.0
 pandas
 pyEDFlib
+tensorflow==2.1.0
+scikit-learn

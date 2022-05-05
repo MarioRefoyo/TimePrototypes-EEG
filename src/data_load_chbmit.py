@@ -203,7 +203,7 @@ def generate_seizure_label(seizures, fs, length):
 if __name__ == "__main__":
     # Declare data path and the desired patient to read the data
     data_path = '../data/chb-mit/'
-    patient = 'chb01'
+    patient = 'chb18'
     patient_data_path = f'{data_path}{patient}/'
     # Calculate the annotation file path for such patient
     annotation_fname = f'{patient}-summary.txt'
