@@ -1,5 +1,5 @@
 import tensorflow as tf
-from utils import pairwise_dist
+from ..utils import pairwise_dist
 
 
 class PrototypeLayer(tf.keras.layers.Layer):
@@ -14,10 +14,6 @@ class PrototypeLayer(tf.keras.layers.Layer):
             a: prototype distribution, return the 'a' layer output as describe in the paper
         """
         super(PrototypeLayer, self).__init__(name=name)
-
-        """self.prototype_feature_vectors = tf.Variable(tf.random.uniform(shape=[n_prototypes, input_shape],
-                                                                       dtype=tf.float32),
-                                                     name='prototype_feature_vectors')"""
         self.n_prototypes = n_prototypes
 
     def build(self, input_shape):

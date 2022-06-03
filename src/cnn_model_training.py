@@ -7,8 +7,8 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
-from data_load_chbmit import read_chbmit_annotations
-from model_training import separate_normal_seizures_registers, create_training_dataset
+from src.data_load_chbmit import read_chbmit_annotations
+from src.data_preparation import separate_normal_seizures_registers, create_training_dataset
 
 
 def make_vanilla_cnn_model(input_shape):
