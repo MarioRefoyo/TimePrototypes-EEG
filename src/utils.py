@@ -2,22 +2,22 @@ import tensorflow as tf
 
 
 @tf.function
-def pairwise_dist(X, Y):
-    '''
+def pairwise_dist(x, y):
+    """
     Pairwise distance between two vectors
     # Argument:
                 X: ndtensor
                 Y: mdtensor
     # Returnes:
                 D: (m x n) matrix
-    '''
+    """
     # squared norm of each vector
-    XX = tf.reduce_sum(tf.square(X), 1)
-    YY = tf.reduce_sum(tf.square(Y), 1)
+    xx = tf.reduce_sum(tf.square(x), 1)
+    yy = tf.reduce_sum(tf.square(y), 1)
     # XX is a row vector and YY is a column vector
-    XX = tf.reshape(XX, [-1, 1])
-    YY = tf.reshape(YY, [1, -1])
-    return XX + YY - 2 * tf.matmul(X, tf.transpose(Y))
+    xx = tf.reshape(xx, [-1, 1])
+    yy = tf.reshape(yy, [1, -1])
+    return xx + yy - 2 * tf.matmul(x, tf.transpose(y))
 
 
 @tf.function

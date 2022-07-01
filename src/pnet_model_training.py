@@ -3,7 +3,7 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-
+from tensorflow.keras.utils import to_categorical
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
@@ -11,7 +11,8 @@ from sklearn.metrics import classification_report
 from src.data_load_chbmit import read_chbmit_annotations
 from src.data_preparation import separate_normal_seizures_registers, create_training_dataset
 from src.model_definitions import TimeProtoNet, TimeProtoFlatNet
-from src.model_training import train
+from src.model_training import train, train_prototype_network
+from src.visualization import plot_tsne
 
 
 if __name__ == '__main__':
@@ -57,8 +58,10 @@ if __name__ == '__main__':
     normal_indexes = list(np.where(y == 0)[0])
     seizure_indexes = list(np.where(y == 1)[0])
     selected_normal_indexes = random.choices(normal_indexes, k=normal_mult*len(seizure_indexes))
+    # Generate final balanced dataset
     X = X[selected_normal_indexes+seizure_indexes, :, :]
     y = y[selected_normal_indexes+seizure_indexes, :]
+    y = to_categorical(y)
 
     # Balance train test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
@@ -71,21 +74,24 @@ if __name__ == '__main__':
 
     # Create model
     input_shape = (X.shape[1], X.shape[2])
-    # pnet_model = TimeProtoNet(input_shape)
-    pnet_model = TimeProtoFlatNet(input_shape)
+    pnet_model = TimeProtoNet(input_shape, 10, 2)
+    # pnet_model = TimeProtoFlatNet(input_shape)
     print(pnet_model.complete_pnet.summary())
 
     # Train model
     optimizer = tf.keras.optimizers.Adam()
-    train_history_df = train(pnet_model, train_dataset, test_dataset, optimizer, epochs=50)
+    train_history_df, prototype_checkpoints = train_prototype_network(pnet_model, train_dataset, test_dataset,
+                                                                      optimizer, epochs_1=40, epochs_2=10,
+                                                                      checkpoints_epoch=10)
     train_history_df[['train_class_bce', 'val_class_bce']].plot()
     train_history_df[['train_recons_mse', 'val_recons_mse']].plot()
+    train_history_df[['train_reg1_loss', 'val_reg1_loss']].plot()
+    train_history_df[['train_reg2_loss', 'val_reg2_loss']].plot()
     train_history_df[['train_total_loss', 'val_total_loss']].plot()
 
     # Predict test windows
     y_pred = pnet_model.classify(X_test).numpy()
-    y_pred = (y_pred > 0.5).astype("int32")
-    print(classification_report(y_test, y_pred))
+    print(classification_report(np.argmax(y_test, axis=1), np.argmax(y_pred, axis=1)))
 
     # Plot reconstructions
     X_reconstructed = pnet_model.reconstruct(X_test)
@@ -102,18 +108,22 @@ if __name__ == '__main__':
     # Decode prototypes
     prototypes = pnet_model.decode(latent_prototypes).numpy() * max_register_value
 
-    # Plot prototypes
+    """# Plot prototypes
     for i in range(prototypes.shape[0]):
         fig, axs = plt.subplots(prototypes.shape[2])
         for channel in range(prototypes.shape[2]):
             axs[channel].plot(prototypes[i, :, channel])
             axs[channel].set_ylim([-1.05*150, 1.05*150])
-        plt.show()
+        plt.show()"""
 
     # Inspect outputs for the pure prototypes
     y_proto = pnet_model.classify(prototypes).numpy()
     print(y_proto)
-    print("Finished")
+
+    # 2D tsne graph with classes and prototypes
+    train_embeddings = pnet_model.encode(X_train)
+    plot_tsne(train_embeddings.numpy(), classes=np.argmax(y_train, axis=1), prototypes_embeddings_list=prototype_checkpoints)
+    print('Finished')
 
 
 

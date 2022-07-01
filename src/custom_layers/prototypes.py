@@ -3,7 +3,7 @@ from ..utils import pairwise_dist
 
 
 class PrototypeLayer(tf.keras.layers.Layer):
-    def __init__(self, n_prototypes, name='protolayer'):
+    def __init__(self, n_prototypes_class, n_classes, name='protolayer'):
         """
         Implimentataion of the Prototype layer
         # Returen:
@@ -14,7 +14,7 @@ class PrototypeLayer(tf.keras.layers.Layer):
             a: prototype distribution, return the 'a' layer output as describe in the paper
         """
         super(PrototypeLayer, self).__init__(name=name)
-        self.n_prototypes = n_prototypes
+        self.n_prototypes = n_prototypes_class * n_classes
 
     def build(self, input_shape):
         self.prototype_feature_vectors = self.add_weight(shape=(self.n_prototypes, input_shape[-1]),

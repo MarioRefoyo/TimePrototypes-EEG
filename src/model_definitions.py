@@ -1,11 +1,19 @@
+import numpy as np
 import tensorflow as tf
-from .custom_layers.prototypes import PrototypeLayer
+from src.custom_layers.prototypes import PrototypeLayer
+
+
+def create_init_weights(n_prototypes_class, n_classes):
+    w = np.ones((n_prototypes_class*n_classes, n_classes)) * -0.5
+    for i in range(n_classes):
+        w[i*n_prototypes_class:(i+1)*n_prototypes_class, i] = [1]*n_prototypes_class
+    return w
 
 
 class TimeProtoNet(tf.keras.Model):
 
     # ToDo: Add params
-    def __init__(self, input_shape):
+    def __init__(self, input_shape, n_prototypes_class, n_classes):
         super(TimeProtoNet, self).__init__()
 
         # Get number of channels
@@ -33,9 +41,12 @@ class TimeProtoNet(tf.keras.Model):
 
         # Create prototypical layer and posterior dense
         pnet_input = tf.keras.layers.Input(shape=(6400,))
-        p_layer = PrototypeLayer(n_prototypes=20, name='proto_layer')(pnet_input)
-        logits = tf.keras.layers.Dense(1, name='classification_logits')(p_layer)
-        output = tf.keras.layers.Activation(tf.keras.activations.sigmoid)(logits)
+        p_layer = PrototypeLayer(n_prototypes_class=n_prototypes_class, n_classes=n_classes,
+                                 name='proto_layer')(pnet_input)
+        logits = tf.keras.layers.Dense(n_classes, kernel_initializer=tf.constant_initializer(
+            create_init_weights(n_prototypes_class=n_prototypes_class, n_classes=n_classes)),
+            name='classification_logits')(p_layer)
+        output = tf.keras.layers.Activation(tf.keras.activations.softmax)(logits)
         self.pnet = tf.keras.models.Model(inputs=pnet_input, outputs=output)
 
         # Create complete model for training
@@ -64,7 +75,7 @@ class TimeProtoNet(tf.keras.Model):
         return reconstruction
 
     def get_prototypes(self):
-        return self.pnet.get_layer('proto_layer').get_weights()[0]
+        return self.pnet.get_layer('proto_layer').weights
 
 
 class TimeProtoFlatNet(tf.keras.Model):
@@ -104,7 +115,7 @@ class TimeProtoFlatNet(tf.keras.Model):
 
         # Create prototypical layer and posterior dense
         pnet_input = tf.keras.layers.Input(shape=(1088,))
-        p_layer = PrototypeLayer(n_prototypes=20, name='proto_layer')(pnet_input)
+        p_layer = PrototypeLayer(n_prototypes_class=10, n_classes=2, name='proto_layer')(pnet_input)
         logits = tf.keras.layers.Dense(1, name='classification_logits')(p_layer)
         output = tf.keras.layers.Activation(tf.keras.activations.sigmoid)(logits)
         self.pnet = tf.keras.models.Model(inputs=pnet_input, outputs=output)
@@ -135,4 +146,4 @@ class TimeProtoFlatNet(tf.keras.Model):
         return reconstruction
 
     def get_prototypes(self):
-        return self.pnet.get_layer('proto_layer').get_weights()[0]
+        return self.pnet.get_layer('proto_layer').weights
