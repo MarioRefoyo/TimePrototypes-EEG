@@ -1,1 +1,1 @@
-# seizure-detection
+# TimePrototypes-EEG
